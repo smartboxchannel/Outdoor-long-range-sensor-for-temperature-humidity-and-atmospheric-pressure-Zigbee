@@ -45,7 +45,7 @@ const uint8 zclApp_ModelId[] = {13, 'E', 'F', 'E', 'K', 'T', 'A', '_', 'T', 'H',
 #endif
 #endif
 const uint8 zclApp_DateCode[] = { 12, '2', '0', '2', '4', '1', '1', '0', '9', ' ', '6', '4', '3'};
-const uint8 zclApp_SWBuildID[] = {5, '1', '.', '0', '.', '5'};
+const uint8 zclApp_SWBuildID[] = {5, '1', '.', '0', '.', '6'};
 
 const uint8 zclApp_PowerSource = POWER_SOURCE_BATTERY;
 
@@ -62,7 +62,6 @@ CONST zclAttrRec_t zclApp_AttrsFirstEP[] = {
     {BASIC, {ATTRID_CLUSTER_REVISION, ZCL_DATATYPE_UINT16, R, (void *)&zclApp_clusterRevision_all}},
     {POWER_CFG, {ATTRID_POWER_CFG_BATTERY_VOLTAGE, ZCL_UINT8, RR, (void *)&zclBattery_Voltage}},
     {POWER_CFG, {ATTRID_POWER_CFG_BATTERY_PERCENTAGE_REMAINING, ZCL_UINT8, RR, (void *)&zclBattery_PercentageRemainig}},
-    {POWER_CFG, {ATTRID_POWER_CFG_BATTERY_VOLTAGE_RAW_ADC, ZCL_UINT16, RR, (void *)&zclBattery_RawAdc}},
     {TEMP, {ATTRID_MS_TEMPERATURE_MEASURED_VALUE, ZCL_INT16, RR, (void *)&zclApp_Temperature_Sensor_MeasuredValue}},
     {PRESSURE, {ATTRID_MS_PRESSURE_MEASUREMENT_MEASURED_VALUE, ZCL_INT16, RR, (void *)&zclApp_PressureSensor_MeasuredValue}},
     {PRESSURE, {ATTRID_MS_PRESSURE_MEASUREMENT_SCALED_VALUE, ZCL_INT16, RR, (void *)&zclApp_PressureSensor_ScaledValue}},

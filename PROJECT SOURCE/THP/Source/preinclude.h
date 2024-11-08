@@ -48,6 +48,7 @@
 #define APP_COMMISSIONING_BY_LONG_PRESS_PORT                                    0x04 //port2
 
 //#define OUTDOOR_LONG_RANGE
+
 //#define BMP
 
 #include "hal_board_cfg.h"
