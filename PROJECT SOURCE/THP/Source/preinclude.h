@@ -11,7 +11,7 @@
 #define ZSTACK_DEVICE_BUILD                                                     (DEVICE_BUILD_ENDDEVICE)
 #define DISABLE_GREENPOWER_BASIC_PROXY
 #define BDB_FINDING_BINDING_CAPABILITY_ENABLED                                  1
-#define BDB_REPORTING                                                           TRUE
+//#define BDB_REPORTING                                                           TRUE
 #define BDB_MAX_CLUSTERENDPOINTS_REPORTING                                      10
 
 #define ISR_KEYINTERRUPT
