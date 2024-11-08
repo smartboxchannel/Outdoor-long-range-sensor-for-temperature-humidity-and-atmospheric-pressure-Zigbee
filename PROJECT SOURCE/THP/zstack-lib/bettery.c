@@ -77,7 +77,7 @@ void zclBattery_Report(void) {
 #if BDB_REPORTING
     bdb_RepChangedAttrValue(1, POWER_CFG, ATTRID_POWER_CFG_BATTERY_PERCENTAGE_REMAINING);
 #else
-    const uint8 NUM_ATTRIBUTES = 3;
+    const uint8 NUM_ATTRIBUTES = 2;
 
   zclReportCmd_t *pReportCmd;
 
@@ -93,10 +93,6 @@ void zclBattery_Report(void) {
     pReportCmd->attrList[1].attrID = ATTRID_POWER_CFG_BATTERY_PERCENTAGE_REMAINING;
     pReportCmd->attrList[1].dataType = ZCL_DATATYPE_UINT8;
     pReportCmd->attrList[1].attrData = (void *)(&zclBattery_PercentageRemainig);
-
-    pReportCmd->attrList[2].attrID = ATTRID_POWER_CFG_BATTERY_VOLTAGE_RAW_ADC;
-    pReportCmd->attrList[2].dataType = ZCL_DATATYPE_UINT16;
-    pReportCmd->attrList[2].attrData = (void *)(&zclBattery_RawAdc);
 
     zcl_Dst2Addr.addrMode = (afAddrMode_t)Addr16Bit;
     zcl_Dst2Addr.addr.shortAddr = 0;
