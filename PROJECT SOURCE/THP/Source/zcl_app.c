@@ -57,13 +57,22 @@
         IO_PUD_PORT(OCM_DATA_PORT, IO_PDN);                                                                                                \
     } while (0)
 
-
+//afAddrType_t zcl_DstAddr;
+//static uint8 SeqNum = 0;
 extern bool requestNewTrustCenterLinkKey;
 byte zclApp_TaskID;
+static uint8 Seq2Num = 0;
+afAddrType_t zcl_DstAddr;
 static uint8 currentSensorsReadingPhase = 0;
 static bool pushBut = false;
 static bool initOut = false;
-uint8 SeqNum = 0;
+#if !defined( BDB_REPORTING )
+static int16 temp_old = 0;
+static int16 tempTr = 25;
+static uint16 hum_old = 0;
+uint16 humTr = 50;
+static uint16 press_old = 0;
+#endif
 afAddrType_t inderect_DstAddr = {.addrMode = (afAddrMode_t)AddrNotPresent, .endPoint = 0, .addr.shortAddr = 0};
 struct bme280_data bme_results;
 struct bme280_dev bme_dev = {.dev_id = BME280_I2C_ADDR_PRIM,
@@ -75,14 +84,21 @@ struct bme280_dev bme_dev = {.dev_id = BME280_I2C_ADDR_PRIM,
 static void zclApp_HandleKeys(byte shift, byte keys);
 static void zclApp_Report(void);
 static void zclApp_ReadSensors(void);
+#if defined( BDB_REPORTING )
 static void zclSendPres(void);
 static void zclSendTemp(void);
 static void zclSendHum(void);
+#else
+static void _ReportTemp(void);
+static void _ReportHum(void);
+static void _ReportPress(void);
+#endif
 static void zclApp_LedOn(void);
 static void zclApp_LedOn2(void);
 static void zclApp_LedOff(void);
 static void zclApp_InitBME280(struct bme280_dev *dev);
 static void zclApp_ReadBME280(struct bme280_dev *dev);
+
 
 static zclGeneral_AppCallbacks_t zclApp_CmdCallbacks = {
     NULL, // Basic Cluster Reset command
@@ -243,15 +259,27 @@ static void zclApp_ReadSensors(void) {
         break;
         
     case 2:
+#if defined( BDB_REPORTING )
         zclSendTemp();
+#else
+        _ReportTemp();
+#endif
         break;
         
     case 3:
+#if defined( BDB_REPORTING )
         zclSendHum();
+#else
+        _ReportHum();
+#endif
         break;
         
    case 4:
+#if defined( BDB_REPORTING )
         zclSendPres();
+#else
+        _ReportPress();
+#endif
         break;     
         
     default:
@@ -335,6 +363,8 @@ static void zclApp_Report(void) {
   osal_start_timerEx(zclApp_TaskID, APP_READ_SENSORS_EVT, 20); 
 }
 
+
+#if defined( BDB_REPORTING )
 static void zclSendPres(void) { 
   if(pushBut == true){
   zclReportCmd_t *pReportCmd;
@@ -351,7 +381,7 @@ static void zclSendPres(void) {
     pReportCmd->attrList[1].dataType = ZCL_INT16;
     pReportCmd->attrList[1].attrData = (void *)(&zclApp_PressureSensor_ScaledValue);
 
-     zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, PRESSURE, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, TRUE, SeqNum++);
+     zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, PRESSURE, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, TRUE, Seq2Num++);
   }
     osal_mem_free(pReportCmd);
   }else{
@@ -372,7 +402,7 @@ static void zclSendTemp(void) {
     pReportCmd->attrList[0].dataType = ZCL_DATATYPE_INT16;
     pReportCmd->attrList[0].attrData = (void *)(&zclApp_Temperature_Sensor_MeasuredValue);
     
-    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, TEMP, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, true, SeqNum++);
+    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, TEMP, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, true, Seq2Num++);
   }
     osal_mem_free(pReportCmd);
   }else{
@@ -393,10 +423,104 @@ static void zclSendHum(void) {
     pReportCmd->attrList[0].dataType = ZCL_DATATYPE_UINT16;
     pReportCmd->attrList[0].attrData = (void *)(&zclApp_HumiditySensor_MeasuredValue);
 
-    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, HUMIDITY, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, true, SeqNum++);
+    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &inderect_DstAddr, HUMIDITY, pReportCmd, ZCL_FRAME_SERVER_CLIENT_DIR, true, Seq2Num++);
   }
     osal_mem_free(pReportCmd);
  }else{
     bdb_RepChangedAttrValue(zclApp_FirstEP.EndPoint, HUMIDITY, ATTRID_MS_RELATIVE_HUMIDITY_MEASURED_VALUE); 
   }
 }
+#else
+void _ReportTemp( void )
+{
+  if (abs(zclApp_Temperature_Sensor_MeasuredValue - temp_old) >= tempTr) {
+  temp_old = zclApp_Temperature_Sensor_MeasuredValue;
+  const uint8 NUM_ATTRIBUTES = 1;
+
+  zclReportCmd_t *pReportCmd;
+
+  pReportCmd = osal_mem_alloc(sizeof(zclReportCmd_t) +
+                              (NUM_ATTRIBUTES * sizeof(zclReport_t)));
+  if (pReportCmd != NULL) {
+    pReportCmd->numAttr = NUM_ATTRIBUTES;
+
+    pReportCmd->attrList[0].attrID = ATTRID_MS_TEMPERATURE_MEASURED_VALUE;
+    pReportCmd->attrList[0].dataType = ZCL_DATATYPE_INT16;
+    pReportCmd->attrList[0].attrData = (void *)(&zclApp_Temperature_Sensor_MeasuredValue);
+
+    zcl_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
+    zcl_DstAddr.addr.shortAddr = 0;
+    zcl_DstAddr.endPoint = 1;
+
+    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &zcl_DstAddr,
+                      ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, pReportCmd,
+                      ZCL_FRAME_SERVER_CLIENT_DIR, true, Seq2Num++);
+  }
+
+  osal_mem_free(pReportCmd);
+  }
+}
+
+void _ReportHum( void )
+{
+  if (abs(zclApp_HumiditySensor_MeasuredValue - hum_old) >= humTr) {
+  hum_old = zclApp_HumiditySensor_MeasuredValue;
+  const uint8 NUM_ATTRIBUTES = 1;
+
+  zclReportCmd_t *pReportCmd;
+
+  pReportCmd = osal_mem_alloc(sizeof(zclReportCmd_t) +
+                              (NUM_ATTRIBUTES * sizeof(zclReport_t)));
+  if (pReportCmd != NULL) {
+    pReportCmd->numAttr = NUM_ATTRIBUTES;
+
+    pReportCmd->attrList[0].attrID = ATTRID_MS_RELATIVE_HUMIDITY_MEASURED_VALUE;
+    pReportCmd->attrList[0].dataType = ZCL_DATATYPE_INT16;
+    pReportCmd->attrList[0].attrData = (void *)(&zclApp_HumiditySensor_MeasuredValue);
+
+    zcl_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
+    zcl_DstAddr.addr.shortAddr = 0;
+    zcl_DstAddr.endPoint = 1;
+
+    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &zcl_DstAddr,
+                      ZCL_CLUSTER_ID_MS_RELATIVE_HUMIDITY, pReportCmd,
+                      ZCL_FRAME_SERVER_CLIENT_DIR, true, Seq2Num++);
+  }
+
+  osal_mem_free(pReportCmd);
+  }
+}
+
+void _ReportPress( void )
+{
+  if(zclApp_PressureSensor_MeasuredValue != press_old){
+    press_old = zclApp_PressureSensor_MeasuredValue;
+  
+  const uint8 NUM_ATTRIBUTES = 1;
+
+  zclReportCmd_t *pReportCmd;
+
+  pReportCmd = osal_mem_alloc(sizeof(zclReportCmd_t) +
+                              (NUM_ATTRIBUTES * sizeof(zclReport_t)));
+  if (pReportCmd != NULL) {
+    pReportCmd->numAttr = NUM_ATTRIBUTES;
+
+    pReportCmd->attrList[0].attrID = ATTRID_MS_PRESSURE_MEASUREMENT_MEASURED_VALUE;
+    pReportCmd->attrList[0].dataType = ZCL_INT16;
+    pReportCmd->attrList[0].attrData = (void *)(&zclApp_PressureSensor_MeasuredValue);
+
+    zcl_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
+    zcl_DstAddr.addr.shortAddr = 0;
+    zcl_DstAddr.endPoint = 1;
+
+    zcl_SendReportCmd(zclApp_FirstEP.EndPoint, &zcl_DstAddr,
+                      ZCL_CLUSTER_ID_MS_PRESSURE_MEASUREMENT, pReportCmd,
+                      ZCL_FRAME_SERVER_CLIENT_DIR, true, Seq2Num++);
+  }
+
+  osal_mem_free(pReportCmd);
+  }
+}
+
+
+#endif
