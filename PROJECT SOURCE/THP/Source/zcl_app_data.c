@@ -33,7 +33,7 @@ const uint8 zclApp_StackVersion = 4;
 const uint8 zclApp_ManufacturerName[] = {9, 'E', 'f', 'e', 'k', 't', 'a', 'L', 'a', 'b'};
 #if defined( BDB_REPORTING )
 #ifdef OUTDOOR_LONG_RANGE
-const uint8 zclApp_ModelId[] = {13, 'E', 'F', 'E', 'K', 'T', 'A', '_', 'T', 'H', 'P', '_', 'L', 'L'};
+const uint8 zclApp_ModelId[] = {13, 'E', 'F', 'E', 'K', 'T', 'A', '_', 'T', 'H', 'P', '_', 'L', 'R'};
 #else
 const uint8 zclApp_ModelId[] = {10, 'E', 'F', 'E', 'K', 'T', 'A', '_', 'T', 'H', 'P'};
 #endif
@@ -45,7 +45,7 @@ const uint8 zclApp_ModelId[] = {13, 'E', 'F', 'E', 'K', 'T', 'A', '_', 'T', 'H',
 #endif
 #endif
 const uint8 zclApp_DateCode[] = { 12, '2', '0', '2', '4', '1', '1', '0', '9', ' ', '6', '4', '3'};
-const uint8 zclApp_SWBuildID[] = {5, '1', '.', '0', '.', '6'};
+const uint8 zclApp_SWBuildID[] = {5, '1', '.', '0', '.', '7'};
 
 const uint8 zclApp_PowerSource = POWER_SOURCE_BATTERY;
 

@@ -15,11 +15,11 @@ extern "C" {
 #define APP_LEDON_EVT                                                           0x0020
 
 #ifdef OUTDOOR_LONG_RANGE
-#define APP_REPORT_DELAY                                                        ((uint32) 30000) //40 sec.
+#define APP_REPORT_DELAY                                                        ((uint32) 20000) //40 sec.
 #else
-#define APP_REPORT_DELAY                                                        ((uint32) 15000) //20 sec.
+#define APP_REPORT_DELAY                                                        ((uint32) 10000) //20 sec.
 #endif
-#define APP_REPORT_BATT_DELAY                                                   ((uint32) 60000*30) //30 min.
+#define APP_REPORT_BATT_DELAY                                                   ((uint32) 60000*90) //90 min.
 
 #define R                                                                       ACCESS_CONTROL_READ
 #define RR                                                                      (R | ACCESS_REPORTABLE)
