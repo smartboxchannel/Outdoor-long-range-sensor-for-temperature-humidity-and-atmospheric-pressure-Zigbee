@@ -77,6 +77,8 @@ Open the preinclude.h file, select the desired configuration
 
 //#define OUTDOOR_LONG_RANGE
 
+//#define BDB_REPORTING  
+
 ---
 
 ### How to join:
