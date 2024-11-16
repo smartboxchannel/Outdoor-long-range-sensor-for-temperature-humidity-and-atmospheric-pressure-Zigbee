@@ -1,0 +1,82 @@
+{
+  "name": "Датчик EFEKTA THP",
+  "manufacturer": "EfektaLab",
+  "model": "(EFEKTA_THP_B0|EFEKTA_THP_LR_B0)",
+  "manufacturerId": "EfektaLab",
+  "modelId": "(EFEKTA_THP_B0|EFEKTA_THP_LR_B0)",
+  "catalogId": -1,
+  "status": "Test",
+  "template": "/_Battery/BatteryPercentageRemaining.json",
+  "init": [
+    {
+      "link": {
+        "endpoint": 1,
+        "cluster": "0402_TemperatureMeasurement",
+        "attribute": "0000_MeasuredValue"
+      },
+      "bind": false
+    },
+    {
+      "link": {
+        "endpoint": 1,
+        "cluster": "0405_RelativeHumidityMeasurement",
+        "attribute": "0000_MeasuredValue"
+      },
+      "bind": false
+    },
+	{
+      "link": {
+        "endpoint": 1,
+        "cluster": "0403_PressureMeasurement",
+        "attribute": "0000_MeasuredValue"
+      },
+      "bind": false
+    }
+  ],
+  "services": [
+    {
+      "type": "C_AtmosphericPressureSensor",
+      "optional": true,
+      "characteristics": [
+        {
+          "type": "C_CurrentAtmosphericPressure",
+          "link": {
+            "endpoint": 1,
+            "cluster": "0403_PressureMeasurement",
+            "attribute": "0000_MeasuredValue"
+          }
+        }
+      ]
+    },
+    {
+      "type": "TemperatureSensor",
+      "optional": true,
+      "characteristics": [
+        {
+          "type": "CurrentTemperature",
+          "link": [
+            {
+              "endpoint": 1,
+              "cluster": "0402_TemperatureMeasurement",
+              "attribute": "0000_MeasuredValue"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "HumiditySensor",
+      "optional": true,
+      "characteristics": [
+        {
+          "type": "CurrentRelativeHumidity",
+          "link": {
+            "endpoint": 1,
+            "cluster": "0405_RelativeHumidityMeasurement",
+            "attribute": "0000_MeasuredValue"
+          }
+        }
+      ]
+    }
+  ]
+}
